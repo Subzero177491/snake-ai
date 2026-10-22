@@ -11,7 +11,7 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #ffffff;
+      background: #fff;
       color: #202123;
       height: 100vh;
       min-height: 100dvh;
@@ -38,7 +38,7 @@
 
     .new-chat {
       border: 1px solid #d9d9e3;
-      background: white;
+      background: #fff;
       padding: 12px;
       border-radius: 10px;
       text-align: left;
@@ -46,7 +46,7 @@
       font-size: 14px;
     }
 
-    .new-chat:hover { background: #eeeeef; }
+    .new-chat:hover { background: #eee; }
 
     .sidebar-note {
       margin-top: auto;
@@ -54,8 +54,6 @@
       color: #777;
       line-height: 1.5;
     }
-
-    .status { color: #16803d; }
 
     .main {
       flex: 1;
@@ -68,7 +66,7 @@
     header {
       width: 100%;
       padding: 17px 24px;
-      border-bottom: 1px solid #eeeeee;
+      border-bottom: 1px solid #eee;
       font-size: 16px;
       font-weight: bold;
     }
@@ -186,7 +184,7 @@
     <div class="sidebar-note">
       Snake AI<br>
       Your personal AI project.<br><br>
-      AI connection: <span class="status">Gemini backend configured</span>
+      Backend: Cloudflare Worker
     </div>
   </aside>
 
@@ -238,7 +236,6 @@
       message.append(label, content);
       chat.appendChild(message);
       chat.scrollTop = chat.scrollHeight;
-
       return message;
     }
 
@@ -265,20 +262,33 @@
           body: JSON.stringify({ message: text })
         });
 
-        const data = await response.json();
+        let data;
+        try {
+          data = await response.json();
+        } catch {
+          throw new Error("The backend returned an invalid response.");
+        }
 
         if (!response.ok) {
-          throw new Error(data.error || "The AI request failed.");
+          const detail = data.details || data.error || "Unknown server error";
+          throw new Error("HTTP " + response.status + ": " + detail);
+        }
+
+        if (typeof data.reply !== "string") {
+          throw new Error("The backend did not return a reply.");
+        }
+
+        thinking.querySelector(".message-content").textContent = data.reply;
+      } catch (error) {
+        console.error("Snake AI error:", error);
+
+        let detail = error.message || "Unknown connection error";
+        if (error instanceof TypeError) {
+          detail = "Network or CORS error. Check the Worker CORS settings and URL.";
         }
 
         thinking.querySelector(".message-content").textContent =
-          data.reply || "I couldn't generate a reply. Please try again.";
-      } catch (error) {
-        console.error("Snake AI error:", error);
-        thinking.querySelector(".message-content").textContent =
-          "Sorry! I couldn't connect to the AI. Please check your internet " +
-          "connection. If the problem continues, the Worker or Gemini API " +
-          "may need troubleshooting.";
+          "Connection error: " + detail;
       } finally {
         sendButton.disabled = false;
         promptBox.focus();
