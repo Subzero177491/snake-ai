@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,9 +6,7 @@
   <meta name="theme-color" content="#ffffff">
   <title>Snake AI</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -17,11 +14,13 @@
       background: #ffffff;
       color: #202123;
       height: 100vh;
+      min-height: 100dvh;
       display: flex;
     }
 
     .sidebar {
       width: 250px;
+      flex-shrink: 0;
       background: #f7f7f8;
       border-right: 1px solid #e5e5e5;
       padding: 20px;
@@ -35,9 +34,7 @@
       margin-bottom: 28px;
     }
 
-    .brand span {
-      color: #16a34a;
-    }
+    .brand span { color: #16a34a; }
 
     .new-chat {
       border: 1px solid #d9d9e3;
@@ -49,9 +46,7 @@
       font-size: 14px;
     }
 
-    .new-chat:hover {
-      background: #eeeeef;
-    }
+    .new-chat:hover { background: #eeeeef; }
 
     .sidebar-note {
       margin-top: auto;
@@ -59,6 +54,8 @@
       color: #777;
       line-height: 1.5;
     }
+
+    .status { color: #16803d; }
 
     .main {
       flex: 1;
@@ -89,9 +86,7 @@
       margin-top: 14vh;
     }
 
-    .logo {
-      font-size: 52px;
-    }
+    .logo { font-size: 52px; }
 
     .welcome h1 {
       font-size: 30px;
@@ -118,9 +113,7 @@
       color: #16803d;
     }
 
-    .message.user .label {
-      color: #555;
-    }
+    .message.user .label { color: #555; }
 
     .composer-wrap {
       width: 100%;
@@ -159,11 +152,10 @@
       height: 42px;
       font-size: 20px;
       cursor: pointer;
+      flex-shrink: 0;
     }
 
-    #send:hover {
-      background: #15803d;
-    }
+    #send:hover { background: #15803d; }
 
     #send:disabled {
       opacity: 0.5;
@@ -178,40 +170,23 @@
     }
 
     @media (max-width: 600px) {
-      .sidebar {
-        display: none;
-      }
-
-      header {
-        padding: 16px;
-      }
-
-      #chat {
-        padding: 18px;
-      }
-
-      .welcome {
-        margin-top: 12vh;
-      }
-
-      .welcome h1 {
-        font-size: 25px;
-      }
-
-      .composer-wrap {
-        padding: 10px 12px 15px;
-      }
+      .sidebar { display: none; }
+      header { padding: 16px; }
+      #chat { padding: 18px; }
+      .welcome { margin-top: 12vh; }
+      .welcome h1 { font-size: 25px; }
+      .composer-wrap { padding: 10px 12px 15px; }
     }
   </style>
 </head>
 <body>
   <aside class="sidebar">
     <div class="brand">🐍 Snake <span>AI</span></div>
-    <button class="new-chat" id="newChat">＋ New chat</button>
+    <button class="new-chat" id="newChat" type="button">＋ New chat</button>
     <div class="sidebar-note">
       Snake AI<br>
       Your personal AI project.<br><br>
-      AI connection: Not configured
+      AI connection: <span class="status">Gemini backend configured</span>
     </div>
   </aside>
 
@@ -234,17 +209,19 @@
         <button id="send" type="submit" aria-label="Send message">↑</button>
       </form>
       <div class="disclaimer">
-        Snake AI preview · Connect an AI backend to enable intelligent answers.
+        Snake AI · AI responses powered by Gemini
       </div>
     </div>
   </main>
 
   <script>
+    const API_URL =
+      "https://lively-disk-f1d1snake-ai-api.anaykokkad.workers.dev/";
+
     const chat = document.getElementById("chat");
     const form = document.getElementById("chatForm");
     const promptBox = document.getElementById("prompt");
     const sendButton = document.getElementById("send");
-    const welcome = document.getElementById("welcome");
 
     function addMessage(role, text) {
       const message = document.createElement("div");
@@ -255,30 +232,58 @@
       label.textContent = role === "user" ? "You" : "Snake AI";
 
       const content = document.createElement("div");
+      content.className = "message-content";
       content.textContent = text;
 
       message.append(label, content);
       chat.appendChild(message);
       chat.scrollTop = chat.scrollHeight;
+
+      return message;
     }
 
-    form.addEventListener("submit", function(event) {
+    form.addEventListener("submit", async function(event) {
       event.preventDefault();
+
       const text = promptBox.value.trim();
+      if (!text || sendButton.disabled) return;
 
-      if (!text) return;
-
+      const welcome = document.getElementById("welcome");
       if (welcome) welcome.remove();
 
       addMessage("user", text);
-      addMessage(
-        "assistant",
-        "I'm currently a website preview! My AI brain hasn't been connected yet. Once we configure a secure AI backend, I'll be able to answer questions and help with coding."
-      );
-
       promptBox.value = "";
       promptBox.style.height = "auto";
-      promptBox.focus();
+      sendButton.disabled = true;
+
+      const thinking = addMessage("assistant", "Snake AI is thinking...");
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "The AI request failed.");
+        }
+
+        thinking.querySelector(".message-content").textContent =
+          data.reply || "I couldn't generate a reply. Please try again.";
+      } catch (error) {
+        console.error("Snake AI error:", error);
+        thinking.querySelector(".message-content").textContent =
+          "Sorry! I couldn't connect to the AI. Please check your internet " +
+          "connection. If the problem continues, the Worker or Gemini API " +
+          "may need troubleshooting.";
+      } finally {
+        sendButton.disabled = false;
+        promptBox.focus();
+        chat.scrollTop = chat.scrollHeight;
+      }
     });
 
     promptBox.addEventListener("input", function() {
@@ -294,19 +299,19 @@
     });
 
     document.getElementById("newChat").addEventListener("click", function() {
-      chat.innerHTML = "";
-      const newWelcome = document.createElement("div");
-      newWelcome.className = "welcome";
-      newWelcome.innerHTML =
-        '<div class="logo">🐍</div>' +
-        '<h1>What can I help you with?</h1>' +
-        '<p>Ask questions, explore ideas, or write some code.<br>' +
-        'Your AI journey starts here.</p>';
-      chat.appendChild(newWelcome);
+      chat.innerHTML = `
+        <div class="welcome" id="welcome">
+          <div class="logo">🐍</div>
+          <h1>What can I help you with?</h1>
+          <p>Ask questions, explore ideas, or write some code.<br>
+          Your AI journey starts here.</p>
+        </div>
+      `;
       promptBox.value = "";
+      promptBox.style.height = "auto";
+      sendButton.disabled = false;
       promptBox.focus();
     });
   </script>
 </body>
 </html>
-```
