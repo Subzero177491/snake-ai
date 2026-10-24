@@ -137,7 +137,7 @@
       </form>
       <div class="disclaimer">Snake AI · AI responses powered by Gemini</div>
       <div class="storage-note">Conversation history stays in this browser and is not synced across devices.</div>
-      <div class="version-note">Snake AI v1.3</div>
+      <div class="version-note">Snake AI v1.4 · Live streaming</div>
     </div>
   </main>
 
@@ -149,6 +149,7 @@
     const MAX_CONTEXT_MESSAGES = 12;
     const MEMORY_STORAGE_KEY = "snakeAI.savedMemories.v1";
     const MAX_MEMORIES = 100;
+    const STREAMING_ENABLED = true;
 
     const chat = document.getElementById("chat");
     const form = document.getElementById("chatForm");
@@ -593,30 +594,67 @@
       promptBox.style.height = "auto";
       isSending = true;
       sendButton.disabled = true;
-      const thinking = addMessage("assistant", "Snake AI is thinking...");
+      const thinking = addMessage("assistant", "⚡ Connecting to Snake AI...");
+      const thinkingContent = thinking.querySelector(".message-content");
+      let streamedReply = "";
 
       try {
         const response = await fetch(API_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: conversationContext(current.messages) })
+          headers: { "Content-Type": "application/json", "Accept": "text/event-stream" },
+          body: JSON.stringify({ message: conversationContext(current.messages), stream: STREAMING_ENABLED })
         });
-        let data;
-        try { data = await response.json(); }
-        catch { throw new Error("The backend returned an invalid response."); }
         if (!response.ok) {
-          const detail = data.details || data.error || "Unknown server error";
+          let detail = "Unknown server error";
+          try {
+            const data = await response.json();
+            detail = data.details || data.error || detail;
+          } catch {}
           throw new Error("HTTP " + response.status + ": " + detail);
         }
-        if (typeof data.reply !== "string") throw new Error("The backend did not return a reply.");
-        renderAssistantContent(thinking.querySelector(".message-content"), data.reply);
-        current.messages.push({ role: "assistant", text: data.reply, time: Date.now() });
+        if (!response.body || !response.body.getReader) {
+          throw new Error("This browser does not support streamed responses. Try an updated browser.");
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let streamError = "";
+        let streamFinished = false;
+        while (!streamFinished) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split(/\r?\n/);
+          buffer = lines.pop() || "";
+          for (const line of lines) {
+            if (!line.startsWith("data:")) continue;
+            const payload = line.slice(5).trim();
+            if (!payload) continue;
+            if (payload === "[DONE]") { streamFinished = true; break; }
+            let eventData;
+            try { eventData = JSON.parse(payload); }
+            catch { continue; }
+            if (eventData.error) { streamError = eventData.error; streamFinished = true; break; }
+            if (typeof eventData.text === "string" && eventData.text) {
+              streamedReply += eventData.text;
+              renderAssistantContent(thinkingContent, streamedReply);
+              chat.scrollTop = chat.scrollHeight;
+            }
+          }
+        }
+        if (streamError) throw new Error(streamError);
+        if (!streamedReply) throw new Error("The stream ended without a reply. Please try again.");
+        renderAssistantContent(thinkingContent, streamedReply);
+        current.messages.push({ role: "assistant", text: streamedReply, time: Date.now() });
       } catch (error) {
-        console.error("Snake AI error:", error);
+        console.error("Snake AI streaming error:", error);
         let detail = error.message || "Unknown connection error";
         if (error instanceof TypeError) detail = "Network or CORS error. Check the Worker CORS settings and URL.";
-        const errorText = "Connection error: " + detail;
-        thinking.querySelector(".message-content").textContent = errorText;
+        const errorText = streamedReply
+          ? streamedReply + "\n\n[Streaming interrupted: " + detail + "]"
+          : "Connection error: " + detail;
+        thinkingContent.textContent = errorText;
         thinking.classList.add("error");
         current.messages.push({ role: "assistant", text: errorText, error: true, time: Date.now() });
       } finally {
