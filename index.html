@@ -31,7 +31,9 @@
     .logo { font-size: 52px; }
     .welcome h1 { font-size: 30px; margin: 12px 0; }
     .welcome p { color: #777; line-height: 1.6; }
-    .message { margin: 20px 0; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .message { margin: 20px 0; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; min-width: 0; max-width: 100%; }
+    .message-content { min-width: 0; max-width: 100%; width: 100%; overflow-wrap: anywhere; }
+    .message-content > .code-block { width: 100%; max-width: 100%; min-width: 0; }
     .message .label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #16803d; }
     .message.user .label { color: #555; }
     .message.error .message-content { color: #b91c1c; }
@@ -50,13 +52,13 @@
     .coding-toggle:hover { background: #f3f4f6; }
     .coding-toggle.active { background: #e8f7ed; color: #166534; border-color: #86d19a; }
     .version-note { text-align: center; font-size: 11px; color: #999; margin-top: 5px; }
-    .code-block { margin: 12px 0; border: 1px solid #30343b; border-radius: 12px; overflow: hidden; background: #17191f; color: #e5e7eb; white-space: normal; }
+    .code-block { display: block; width: 100%; max-width: 100%; min-width: 0; margin: 12px 0; border: 1px solid #30343b; border-radius: 12px; overflow: hidden; background: #17191f; color: #e5e7eb; white-space: normal; }
     .code-toolbar { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: #242730; border-bottom: 1px solid #383b44; font-size: 12px; color: #cbd5e1; }
     .code-language { flex: 1; font-weight: 700; text-transform: lowercase; }
     .code-action { border: 1px solid #555966; background: #30343d; color: #f9fafb; padding: 5px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; }
     .code-action:hover { background: #414653; }
-    .code-block pre { margin: 0; padding: 14px; overflow-x: auto; font: 13px/1.6 Consolas, "Courier New", monospace; tab-size: 2; }
-    .code-block code { font: inherit; }
+    .code-block pre { display: block; width: 100%; max-width: 100%; min-width: 0; margin: 0; padding: 14px; overflow-x: auto; overflow-y: hidden; white-space: pre; font: 13px/1.6 Consolas, "Courier New", monospace; tab-size: 2; overscroll-behavior-x: contain; }
+    .code-block code { display: inline; font: inherit; white-space: pre; overflow-wrap: normal; word-break: normal; }
     .syntax-keyword { color: #c4a7ff; }
     .syntax-string { color: #a5d6a7; }
     .syntax-comment { color: #8b949e; font-style: italic; }
@@ -135,7 +137,7 @@
         <textarea id="prompt" placeholder="Message Snake AI..." rows="1" aria-label="Message Snake AI"></textarea>
         <button id="send" type="submit" aria-label="Send message">↑</button>
       </form>
-      <div class="disclaimer">Snake AI · AI responses powered by Gemini</div>
+      <div class="disclaimer">Snake AI · Model: VIPER</div>
       <div class="storage-note">Conversation history stays in this browser and is not synced across devices.</div>
       <div class="version-note">Snake AI v1.4 · Live streaming</div>
     </div>
@@ -423,7 +425,10 @@
         }
       }
 
-      const fencePattern = /```([^\n`]*)\n([\s\S]*?)```/g;
+      // Parse both completed and still-streaming fences. Without the end-of-text
+      // alternative, unfinished code fences are mistakenly rendered as plain text.
+      if (((text.match(/```/g) || []).length % 2 === 1) && text.lastIndexOf("```") > text.lastIndexOf("\n")) text += "\n";
+      const fencePattern = /```([^\n`]*)\n([\s\S]*?)(?:```|$)/g;
       let last = 0, match, blockIndex = 0;
       while ((match = fencePattern.exec(text)) !== null) {
         if (match.index > last) {
@@ -618,16 +623,46 @@
       let displayedReply = "";
       let pendingDisplayText = "";
       let displayTask = null;
+      let autoFollowChat = true;
+      let userPausedAutoFollow = false;
+      let lastTouchY = null;
+      const isChatNearBottom = () => chat.scrollHeight - chat.scrollTop - chat.clientHeight < 90;
+      const updateAutoFollow = () => {
+        if (isChatNearBottom()) {
+          userPausedAutoFollow = false;
+          autoFollowChat = true;
+        } else {
+          userPausedAutoFollow = true;
+          autoFollowChat = false;
+        }
+      };
+      const onChatWheel = event => {
+        if (event.deltaY < 0) { userPausedAutoFollow = true; autoFollowChat = false; }
+        else if (isChatNearBottom()) { userPausedAutoFollow = false; autoFollowChat = true; }
+      };
+      const onTouchStart = event => { lastTouchY = event.touches?.[0]?.clientY ?? null; };
+      const onTouchMove = event => {
+        const y = event.touches?.[0]?.clientY;
+        if (lastTouchY !== null && y !== undefined && y > lastTouchY + 2) {
+          userPausedAutoFollow = true;
+          autoFollowChat = false;
+        }
+        lastTouchY = y ?? null;
+      };
+      chat.addEventListener("scroll", updateAutoFollow, { passive: true });
+      chat.addEventListener("wheel", onChatWheel, { passive: true });
+      chat.addEventListener("touchstart", onTouchStart, { passive: true });
+      chat.addEventListener("touchmove", onTouchMove, { passive: true });
 
       async function drainDisplayQueue() {
         while (pendingDisplayText.length > 0) {
           // Reveal text at a steady, natural pace even when Gemini sends large chunks.
-          const count = pendingDisplayText.length > 180 ? 3 : 2;
+          const count = pendingDisplayText.length > 500 ? 36 : 14;
           displayedReply += pendingDisplayText.slice(0, count);
           pendingDisplayText = pendingDisplayText.slice(count);
           renderAssistantContent(thinkingContent, displayedReply);
-          chat.scrollTop = chat.scrollHeight;
-          await new Promise(resolve => setTimeout(resolve, 35));
+          if (autoFollowChat && !userPausedAutoFollow) chat.scrollTop = chat.scrollHeight;
+          await new Promise(resolve => setTimeout(resolve, 10));
         }
       }
 
@@ -691,8 +726,12 @@
             catch { continue; }
             if (eventData.error) { streamError = eventData.error; streamFinished = true; break; }
             if (typeof eventData.text === "string" && eventData.text) {
-              streamedReply += eventData.text;
-              queueDisplayText(eventData.text);
+              // Ignore an accidentally replayed identical SSE delta, which can
+              // otherwise make the same long phrase appear twice.
+              const chunk = eventData.text;
+              if (chunk.length >= 12 && streamedReply.endsWith(chunk)) continue;
+              streamedReply += chunk;
+              queueDisplayText(chunk);
             }
           }
         }
@@ -720,7 +759,11 @@
         isSending = false;
         sendButton.disabled = false;
         promptBox.focus();
-        chat.scrollTop = chat.scrollHeight;
+        chat.removeEventListener("scroll", updateAutoFollow);
+        chat.removeEventListener("wheel", onChatWheel);
+        chat.removeEventListener("touchstart", onTouchStart);
+        chat.removeEventListener("touchmove", onTouchMove);
+        if (autoFollowChat && !userPausedAutoFollow) chat.scrollTop = chat.scrollHeight;
       }
     });
 
