@@ -43,7 +43,9 @@
     #send { border: none; background: #16a34a; color: white; border-radius: 10px; width: 42px; height: 42px; font-size: 20px; cursor: pointer; flex-shrink: 0; }
     #send:hover { background: #15803d; }
     #send:disabled { opacity: .5; cursor: wait; }
-    .disclaimer { text-align: center; font-size: 11px; color: #888; margin-top: 10px; }
+    .model-picker { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; font-size: 12px; color: #777; }
+    .model-picker select { border: 1px solid #d9d9e3; background: #fff; color: #202123; border-radius: 8px; padding: 6px 9px; font: inherit; cursor: pointer; }
+    .disclaimer { text-align: center; font-size: 11px; color: #888; margin-top: 7px; }
     .storage-note { font-size: 11px; color: #888; text-align: center; margin-top: 5px; }
     .mobile-scrim { display: none; }
 
@@ -137,9 +139,10 @@
         <textarea id="prompt" placeholder="Message Snake AI..." rows="1" aria-label="Message Snake AI"></textarea>
         <button id="send" type="submit" aria-label="Send message">↑</button>
       </form>
-      <div class="disclaimer">Snake AI · Model: VIPER 2</div>
+      <div class="model-picker"><label for="modelSelect">Model</label><select id="modelSelect" aria-label="Choose AI model"><option value="viper1">VIPER 1</option><option value="viper2" selected>VIPER 2</option></select></div>
+      <div class="disclaimer" id="modelDescription">VIPER 2 · Gemini 3.8 Flash with 3.6 Flash fallback</div>
       <div class="storage-note">Conversation history stays in this browser and is not synced across devices.</div>
-      <div class="version-note">Snake AI v1.5 · VIPER 2 · Gemini 3.8 Flash with 3.6 Flash fallback</div>
+      <div class="version-note">Snake AI v1.6 · Switchable VIPER 1 / VIPER 2</div>
     </div>
   </main>
 
@@ -152,6 +155,20 @@
     const MEMORY_STORAGE_KEY = "snakeAI.savedMemories.v1";
     const MAX_MEMORIES = 100;
     const STREAMING_ENABLED = true;
+    const MODEL_STORAGE_KEY = "snakeAI.selectedModel.v1";
+    const modelSelect = document.getElementById("modelSelect");
+    const modelDescription = document.getElementById("modelDescription");
+    try { modelSelect.value = localStorage.getItem(MODEL_STORAGE_KEY) || "viper2"; } catch {}
+    function updateModelDescription() {
+      const descriptions = {
+        viper1: "VIPER 1 · Gemini 3.5 Flash Lite with 3.6 Flash fallback",
+        viper2: "VIPER 2 · Gemini 3.8 Flash with 3.6 Flash fallback"
+      };
+      modelDescription.textContent = descriptions[modelSelect.value] || descriptions.viper2;
+      try { localStorage.setItem(MODEL_STORAGE_KEY, modelSelect.value); } catch {}
+    }
+    modelSelect.addEventListener("change", updateModelDescription);
+    updateModelDescription();
 
     const chat = document.getElementById("chat");
     const form = document.getElementById("chatForm");
@@ -691,7 +708,7 @@
         const response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json", "Accept": "text/event-stream" },
-          body: JSON.stringify({ message: conversationContext(current.messages), stream: STREAMING_ENABLED })
+          body: JSON.stringify({ message: conversationContext(current.messages), stream: STREAMING_ENABLED, model: modelSelect.value })
         });
         if (!response.ok) {
           let detail = "Unknown server error";
