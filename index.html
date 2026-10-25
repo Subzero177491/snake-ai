@@ -137,9 +137,9 @@
         <textarea id="prompt" placeholder="Message Snake AI..." rows="1" aria-label="Message Snake AI"></textarea>
         <button id="send" type="submit" aria-label="Send message">↑</button>
       </form>
-      <div class="disclaimer">Snake AI · Model: VIPER 2</div>
+      <div class="disclaimer">Snake AI · Model: VIPER</div>
       <div class="storage-note">Conversation history stays in this browser and is not synced across devices.</div>
-      <div class="version-note">Snake AI v1.6 · VIPER 2 · Faster streaming display</div>
+      <div class="version-note">Snake AI v1.4 · Live streaming</div>
     </div>
   </main>
 
@@ -656,11 +656,13 @@
 
       async function drainDisplayQueue() {
         while (pendingDisplayText.length > 0) {
-          // Render each received stream chunk immediately; avoid artificial typewriter delays.
-          displayedReply += pendingDisplayText;
-          pendingDisplayText = "";
+          // Reveal text at a steady, natural pace even when Gemini sends large chunks.
+          const count = pendingDisplayText.length > 500 ? 36 : 14;
+          displayedReply += pendingDisplayText.slice(0, count);
+          pendingDisplayText = pendingDisplayText.slice(count);
           renderAssistantContent(thinkingContent, displayedReply);
           if (autoFollowChat && !userPausedAutoFollow) chat.scrollTop = chat.scrollHeight;
+          await new Promise(resolve => setTimeout(resolve, 10));
         }
       }
 
