@@ -103,36 +103,6 @@
     .memory-status { font-size: 12px; color: #16803d; min-height: 18px; margin-top: 8px; }
 
 
-    .studio-overlay { display:none; position:fixed; z-index:70; inset:0; background:#f8fafc; color:#111827; overflow:auto; }
-    .studio-overlay.open { display:block; }
-    .studio-shell { max-width:1100px; margin:0 auto; padding:18px; }
-    .studio-header { display:flex; align-items:center; gap:12px; padding:8px 0 18px; border-bottom:1px solid #e5e7eb; }
-    .studio-header h2 { margin:0; font-size:21px; }
-    .studio-header p { margin:4px 0 0; color:#6b7280; font-size:12px; }
-    .studio-close { margin-left:auto; border:1px solid #d1d5db; background:white; border-radius:10px; padding:9px 12px; cursor:pointer; }
-    .studio-layout { display:grid; grid-template-columns:minmax(0, .85fr) minmax(0, 1.15fr); gap:18px; padding-top:20px; }
-    .studio-panel { background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:18px; min-width:0; box-shadow:0 4px 20px #0f172a08; }
-    .studio-panel h3 { margin:0 0 14px; font-size:16px; }
-    .studio-label { display:block; font-size:13px; font-weight:700; margin:14px 0 7px; }
-    #studioPrompt { display:block; width:100%; min-height:125px; resize:vertical; border:1px solid #d1d5db; border-radius:11px; padding:12px; font:inherit; line-height:1.5; outline:none; }
-    #studioPrompt:focus { border-color:#8b5cf6; box-shadow:0 0 0 3px #8b5cf622; }
-    .studio-controls { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-    .studio-controls select { width:100%; min-width:0; border:1px solid #d1d5db; border-radius:9px; background:#fff; padding:10px; font:inherit; }
-    .studio-generate { width:100%; margin-top:16px; padding:12px; border:0; border-radius:11px; color:#fff; background:linear-gradient(100deg,#7c3aed,#2563eb); font-weight:700; cursor:pointer; }
-    .studio-generate:disabled { opacity:.55; cursor:wait; }
-    .studio-status { min-height:20px; margin-top:10px; color:#6b7280; font-size:12px; line-height:1.5; }
-    .studio-status.error { color:#b91c1c; }
-    .studio-preview { min-height:350px; display:flex; align-items:center; justify-content:center; border:1px dashed #cbd5e1; border-radius:13px; background:radial-gradient(circle at 20% 20%,#f5f3ff,#f8fafc 55%,#eff6ff); overflow:hidden; }
-    .studio-placeholder { max-width:280px; padding:25px; text-align:center; color:#64748b; line-height:1.6; }
-    .studio-placeholder .studio-icon { font-size:48px; display:block; margin-bottom:10px; }
-    #studioImage { display:none; width:100%; height:auto; max-height:68vh; object-fit:contain; }
-    .studio-image-actions { display:flex; gap:9px; margin-top:12px; }
-    .studio-image-actions button { flex:1; border:1px solid #d1d5db; background:#fff; border-radius:9px; padding:10px; cursor:pointer; }
-    .studio-image-actions button:disabled { opacity:.4; cursor:not-allowed; }
-    .studio-footnote { color:#6b7280; font-size:11px; line-height:1.5; margin-top:12px; }
-    .studio-button { border:1px solid #c4b5fd; background:#f5f3ff; color:#6d28d9; border-radius:9px; padding:8px 10px; cursor:pointer; font-size:13px; white-space:nowrap; }
-    .studio-button:hover { background:#ede9fe; }
-    @media (max-width:760px) { .studio-layout { grid-template-columns:1fr; } .studio-shell { padding:12px; } .studio-panel { padding:14px; } .studio-preview { min-height:260px; } .studio-header h2 { font-size:18px; } }
 
     @media (max-width: 650px) {
       .sidebar { display: none; position: fixed; z-index: 20; top: 0; bottom: 0; left: 0; width: min(290px, 85vw); box-shadow: 8px 0 28px #00000020; }
@@ -156,7 +126,7 @@
     <button class="memory-button" id="manageMemory" type="button">🧠 Manage memory</button>
     <div class="history-heading">Your conversations</div>
     <div id="historyList" aria-label="Saved conversations"></div>
-    <div class="sidebar-note">Chats are saved in this browser on this device.<br><br>Backend: Cloudflare Worker</div>
+    <div class="sidebar-note">Chats are saved in this browser on this device.</div>
   </aside>
 
   <div class="memory-overlay" id="memoryOverlay" role="dialog" aria-modal="true" aria-labelledby="memoryTitle">
@@ -175,48 +145,17 @@
     </div>
   </div>
 
-  <section class="studio-overlay" id="studioOverlay" role="dialog" aria-modal="true" aria-labelledby="studioTitle">
-    <div class="studio-shell">
-      <div class="studio-header">
-        <div><h2 id="studioTitle">🎨 VIPER Image Studio</h2><p>Turn your imagination into an image.</p></div>
-        <button class="studio-close" id="closeImageStudio" type="button">✕ Close</button>
-      </div>
-      <div class="studio-layout">
-        <section class="studio-panel">
-          <h3>Create an image</h3>
-          <form id="studioForm">
-            <label class="studio-label" for="studioPrompt">Describe your image</label>
-            <textarea id="studioPrompt" maxlength="1800" placeholder="A neon cyberpunk snake coiled around a glowing crystal, cinematic lighting, highly detailed digital art..." required></textarea>
-            <div class="studio-controls">
-              <div><label class="studio-label" for="studioStyle">Style</label><select id="studioStyle"><option value="">No extra style</option><option value="cinematic digital art">Cinematic digital art</option><option value="anime illustration">Anime</option><option value="photorealistic photography">Photorealistic</option><option value="3D render, detailed materials">3D render</option><option value="watercolor painting">Watercolor</option><option value="pixel art">Pixel art</option><option value="minimal vector illustration">Minimal vector</option><option value="fantasy concept art">Fantasy concept art</option></select></div>
-              <div><label class="studio-label" for="studioRatio">Aspect ratio</label><select id="studioRatio"><option value="square">Square</option><option value="landscape">Landscape</option><option value="portrait">Portrait</option></select></div>
-            </div>
-            <button class="studio-generate" id="studioGenerate" type="submit">✨ Generate image</button>
-            <div class="studio-status" id="studioStatus" aria-live="polite">Uses Cloudflare Workers AI. Free usage limits apply.</div>
-          </form>
-          <p class="studio-footnote">Tip: describe the subject, setting, colors, lighting, and mood. Avoid entering private information.</p>
-        </section>
-        <section class="studio-panel">
-          <h3>Your creation</h3>
-          <div class="studio-preview" id="studioPreview"><div class="studio-placeholder" id="studioPlaceholder"><span class="studio-icon">🪄</span>Your generated image will appear here. Write a prompt and press Generate.</div><img id="studioImage" alt="AI-generated image preview"></div>
-          <div class="studio-image-actions"><button id="studioDownload" type="button" disabled>⬇ Download image</button><button id="studioClear" type="button" disabled>✕ Clear preview</button></div>
-        </section>
-      </div>
-    </div>
-  </section>
-
   <main class="main">
-    <header><button id="mobileHistory" type="button" aria-label="Open chat history">☰</button><span>🐍 Snake AI</span><span class="header-spacer"></span><button id="openImageStudio" class="studio-button" type="button">🎨 Image Studio</button><button id="codingMode" class="coding-toggle" type="button" aria-pressed="false" title="Ask Snake AI for complete code files">💻 Coding mode: Off</button></header>
+    <header><button id="mobileHistory" type="button" aria-label="Open chat history">☰</button><span>🐍 Snake AI</span><span class="header-spacer"></span><button id="codingMode" class="coding-toggle" type="button" aria-pressed="false" title="Ask Snake AI for complete code files">💻 Coding mode: Off</button></header>
     <section id="chat" aria-live="polite"></section>
     <div class="composer-wrap">
       <form class="composer" id="chatForm">
         <textarea id="prompt" placeholder="Message Snake AI..." rows="1" aria-label="Message Snake AI"></textarea>
         <button id="send" type="submit" aria-label="Send message">↑</button>
       </form>
-      <div class="model-picker"><label for="modelSelect">Model</label><select id="modelSelect" aria-label="Choose AI model"><option value="viper1">VIPER 1</option><option value="viper2" selected>VIPER 2</option></select></div>
-      <div class="disclaimer" id="modelDescription">VIPER 2 · Gemini 3.8 Flash with 3.6 Flash fallback</div>
+      <div class="disclaimer">VIPER · Gemini-powered AI</div>
       <div class="storage-note">Conversation history stays in this browser and is not synced across devices.</div>
-      <div class="version-note">Snake AI v1.7 · VIPER 1 / VIPER 2 + Image Studio</div>
+      <div class="version-note">Snake AI v1.9 · Markdown renderer</div>
     </div>
   </main>
 
@@ -229,20 +168,6 @@
     const MEMORY_STORAGE_KEY = "snakeAI.savedMemories.v1";
     const MAX_MEMORIES = 100;
     const STREAMING_ENABLED = true;
-    const MODEL_STORAGE_KEY = "snakeAI.selectedModel.v1";
-    const modelSelect = document.getElementById("modelSelect");
-    const modelDescription = document.getElementById("modelDescription");
-    try { modelSelect.value = localStorage.getItem(MODEL_STORAGE_KEY) || "viper2"; } catch {}
-    function updateModelDescription() {
-      const descriptions = {
-        viper1: "VIPER 1 · Gemini 3.5 Flash Lite with 3.6 Flash fallback",
-        viper2: "VIPER 2 · Gemini 3.8 Flash with 3.6 Flash fallback"
-      };
-      modelDescription.textContent = descriptions[modelSelect.value] || descriptions.viper2;
-      try { localStorage.setItem(MODEL_STORAGE_KEY, modelSelect.value); } catch {}
-    }
-    modelSelect.addEventListener("change", updateModelDescription);
-    updateModelDescription();
 
     const chat = document.getElementById("chat");
     const form = document.getElementById("chatForm");
@@ -296,102 +221,7 @@
       try {
         savedMemories = [...new Set(savedMemories.map(item => item.trim()).filter(Boolean))].slice(0, MAX_MEMORIES);
         localStorage.setItem(MEMORY_STORAGE_KEY, JSON.stringify(savedMemories));
-    
-    // VIPER Image Studio: image generation is routed through the Cloudflare Worker.
-    const studioOverlay = document.getElementById("studioOverlay");
-    const studioForm = document.getElementById("studioForm");
-    const studioPrompt = document.getElementById("studioPrompt");
-    const studioStyle = document.getElementById("studioStyle");
-    const studioRatio = document.getElementById("studioRatio");
-    const studioGenerate = document.getElementById("studioGenerate");
-    const studioStatus = document.getElementById("studioStatus");
-    const studioImage = document.getElementById("studioImage");
-    const studioPlaceholder = document.getElementById("studioPlaceholder");
-    const studioDownload = document.getElementById("studioDownload");
-    const studioClear = document.getElementById("studioClear");
-    let studioImageBlob = null;
-    let studioImageUrl = null;
-
-    function openStudio() {
-      studioOverlay.classList.add("open");
-      document.body.style.overflow = "hidden";
-      studioPrompt.focus();
-    }
-    function closeStudio() {
-      studioOverlay.classList.remove("open");
-      document.body.style.overflow = "";
-      document.getElementById("openImageStudio").focus();
-    }
-    function clearStudioImage() {
-      if (studioImageUrl) URL.revokeObjectURL(studioImageUrl);
-      studioImageUrl = null;
-      studioImageBlob = null;
-      studioImage.removeAttribute("src");
-      studioImage.style.display = "none";
-      studioPlaceholder.style.display = "block";
-      studioDownload.disabled = true;
-      studioClear.disabled = true;
-    }
-    document.getElementById("openImageStudio").addEventListener("click", openStudio);
-    document.getElementById("closeImageStudio").addEventListener("click", closeStudio);
-    studioOverlay.addEventListener("click", event => { if (event.target === studioOverlay) closeStudio(); });
-    document.addEventListener("keydown", event => { if (event.key === "Escape" && studioOverlay.classList.contains("open")) closeStudio(); });
-    studioClear.addEventListener("click", clearStudioImage);
-    studioDownload.addEventListener("click", () => {
-      if (!studioImageBlob) return;
-      const url = URL.createObjectURL(studioImageBlob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "viper-image-" + new Date().toISOString().replace(/[:.]/g, "-") + ".png";
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    });
-    studioForm.addEventListener("submit", async event => {
-      event.preventDefault();
-      const prompt = studioPrompt.value.trim();
-      if (!prompt) { studioStatus.textContent = "Enter a description first."; studioStatus.classList.add("error"); return; }
-      if (prompt.length > 1800) { studioStatus.textContent = "Please shorten your prompt to 1,800 characters."; studioStatus.classList.add("error"); return; }
-      const ratio = studioRatio.value;
-      const dimensions = ratio === "landscape" ? { width: 768, height: 512 } : ratio === "portrait" ? { width: 512, height: 768 } : { width: 512, height: 512 };
-      const style = studioStyle.value;
-      const fullPrompt = style ? `${prompt}. Style: ${style}.` : prompt;
-      studioGenerate.disabled = true;
-      studioGenerate.textContent = "⏳ Generating...";
-      studioStatus.classList.remove("error");
-      studioStatus.textContent = "VIPER is creating your image. This can take a little while...";
-      try {
-        const response = await fetch(API_URL.replace(/\/$/, "") + "/generate-image", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Accept": "image/png" },
-          body: JSON.stringify({ prompt: fullPrompt, width: dimensions.width, height: dimensions.height })
-        });
-        if (!response.ok) {
-          let detail = `Request failed (HTTP ${response.status}).`;
-          try { const data = await response.json(); detail = data.error || data.details || detail; } catch {}
-          throw new Error(detail);
-        }
-        const blob = await response.blob();
-        if (!blob.size || !blob.type.startsWith("image/")) throw new Error("The Worker did not return a valid image. Check the AI binding and Worker code.");
-        if (studioImageUrl) URL.revokeObjectURL(studioImageUrl);
-        studioImageBlob = blob;
-        studioImageUrl = URL.createObjectURL(blob);
-        studioImage.src = studioImageUrl;
-        studioImage.style.display = "block";
-        studioPlaceholder.style.display = "none";
-        studioDownload.disabled = false;
-        studioClear.disabled = false;
-        studioStatus.textContent = "Image generated successfully. Download it to save a copy.";
-      } catch (error) {
-        console.error("VIPER Image Studio error:", error);
-        studioStatus.textContent = (error instanceof TypeError ? "Network/CORS error. " : "") + (error.message || "Image generation failed.");
-        studioStatus.classList.add("error");
-      } finally {
-        studioGenerate.disabled = false;
-        studioGenerate.textContent = "✨ Generate image";
-      }
-    });
-
-    renderMemories();
+        renderMemories();
         return true;
       } catch (error) {
         console.warn("Could not save Snake AI memories:", error);
@@ -961,7 +791,7 @@
         const response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json", "Accept": "text/event-stream" },
-          body: JSON.stringify({ message: conversationContext(current.messages), stream: STREAMING_ENABLED, model: modelSelect.value })
+          body: JSON.stringify({ message: conversationContext(current.messages), stream: STREAMING_ENABLED, model: "viper2" })
         });
         if (!response.ok) {
           let detail = "Unknown server error";
