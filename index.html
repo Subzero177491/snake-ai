@@ -43,7 +43,9 @@
     #send { border: none; background: #16a34a; color: white; border-radius: 10px; width: 42px; height: 42px; font-size: 20px; cursor: pointer; flex-shrink: 0; }
     #send:hover { background: #15803d; }
     #send:disabled { opacity: .5; cursor: wait; }
-    .disclaimer { text-align: center; font-size: 11px; color: #888; margin-top: 10px; }
+    .model-picker { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; font-size: 12px; color: #777; }
+    .model-picker select { border: 1px solid #d9d9e3; background: #fff; color: #202123; border-radius: 8px; padding: 6px 9px; font: inherit; cursor: pointer; }
+    .disclaimer { text-align: center; font-size: 11px; color: #888; margin-top: 7px; }
     .storage-note { font-size: 11px; color: #888; text-align: center; margin-top: 5px; }
     .mobile-scrim { display: none; }
 
@@ -66,6 +68,18 @@
     .syntax-tag { color: #7dd3fc; }
     .syntax-attribute { color: #f0abfc; }
     .inline-code { background: #f0f0f0; padding: 2px 5px; border-radius: 4px; font: .9em Consolas, monospace; }
+    .markdown-body { white-space: normal; line-height: 1.7; overflow-wrap: anywhere; }
+    .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 { line-height: 1.3; margin: 1.05em 0 .45em; }
+    .markdown-body h1 { font-size: 1.55em; } .markdown-body h2 { font-size: 1.35em; } .markdown-body h3 { font-size: 1.15em; }
+    .markdown-body p { margin: .45em 0 .8em; }
+    .markdown-body ul, .markdown-body ol { margin: .45em 0 .9em; padding-left: 1.7em; }
+    .markdown-body li { margin: .2em 0; padding-left: .15em; }
+    .markdown-body blockquote { margin: .7em 0; padding: .15em 0 .15em 1em; border-left: 3px solid #d1d5db; color: #555; }
+    .markdown-body hr { border: 0; border-top: 1px solid #e5e7eb; margin: 1em 0; }
+    .markdown-body a { color: #15803d; text-decoration: underline; }
+    .markdown-body table { border-collapse: collapse; display: block; max-width: 100%; overflow-x: auto; margin: .8em 0; }
+    .markdown-body th, .markdown-body td { border: 1px solid #d1d5db; padding: 6px 9px; text-align: left; }
+    .markdown-body th { background: #f3f4f6; }
 
 
     .memory-button { margin-top: 10px; border: 1px solid #d9d9e3; background: #fff; padding: 11px 12px; border-radius: 10px; text-align: left; cursor: pointer; font-size: 14px; }
@@ -87,6 +101,38 @@
     .memory-delete { border: 0; background: transparent; color: #b91c1c; cursor: pointer; border-radius: 6px; padding: 4px 7px; }
     .memory-empty { color: #777; font-size: 13px; padding: 10px 2px; }
     .memory-status { font-size: 12px; color: #16803d; min-height: 18px; margin-top: 8px; }
+
+
+    .studio-overlay { display:none; position:fixed; z-index:70; inset:0; background:#f8fafc; color:#111827; overflow:auto; }
+    .studio-overlay.open { display:block; }
+    .studio-shell { max-width:1100px; margin:0 auto; padding:18px; }
+    .studio-header { display:flex; align-items:center; gap:12px; padding:8px 0 18px; border-bottom:1px solid #e5e7eb; }
+    .studio-header h2 { margin:0; font-size:21px; }
+    .studio-header p { margin:4px 0 0; color:#6b7280; font-size:12px; }
+    .studio-close { margin-left:auto; border:1px solid #d1d5db; background:white; border-radius:10px; padding:9px 12px; cursor:pointer; }
+    .studio-layout { display:grid; grid-template-columns:minmax(0, .85fr) minmax(0, 1.15fr); gap:18px; padding-top:20px; }
+    .studio-panel { background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:18px; min-width:0; box-shadow:0 4px 20px #0f172a08; }
+    .studio-panel h3 { margin:0 0 14px; font-size:16px; }
+    .studio-label { display:block; font-size:13px; font-weight:700; margin:14px 0 7px; }
+    #studioPrompt { display:block; width:100%; min-height:125px; resize:vertical; border:1px solid #d1d5db; border-radius:11px; padding:12px; font:inherit; line-height:1.5; outline:none; }
+    #studioPrompt:focus { border-color:#8b5cf6; box-shadow:0 0 0 3px #8b5cf622; }
+    .studio-controls { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .studio-controls select { width:100%; min-width:0; border:1px solid #d1d5db; border-radius:9px; background:#fff; padding:10px; font:inherit; }
+    .studio-generate { width:100%; margin-top:16px; padding:12px; border:0; border-radius:11px; color:#fff; background:linear-gradient(100deg,#7c3aed,#2563eb); font-weight:700; cursor:pointer; }
+    .studio-generate:disabled { opacity:.55; cursor:wait; }
+    .studio-status { min-height:20px; margin-top:10px; color:#6b7280; font-size:12px; line-height:1.5; }
+    .studio-status.error { color:#b91c1c; }
+    .studio-preview { min-height:350px; display:flex; align-items:center; justify-content:center; border:1px dashed #cbd5e1; border-radius:13px; background:radial-gradient(circle at 20% 20%,#f5f3ff,#f8fafc 55%,#eff6ff); overflow:hidden; }
+    .studio-placeholder { max-width:280px; padding:25px; text-align:center; color:#64748b; line-height:1.6; }
+    .studio-placeholder .studio-icon { font-size:48px; display:block; margin-bottom:10px; }
+    #studioImage { display:none; width:100%; height:auto; max-height:68vh; object-fit:contain; }
+    .studio-image-actions { display:flex; gap:9px; margin-top:12px; }
+    .studio-image-actions button { flex:1; border:1px solid #d1d5db; background:#fff; border-radius:9px; padding:10px; cursor:pointer; }
+    .studio-image-actions button:disabled { opacity:.4; cursor:not-allowed; }
+    .studio-footnote { color:#6b7280; font-size:11px; line-height:1.5; margin-top:12px; }
+    .studio-button { border:1px solid #c4b5fd; background:#f5f3ff; color:#6d28d9; border-radius:9px; padding:8px 10px; cursor:pointer; font-size:13px; white-space:nowrap; }
+    .studio-button:hover { background:#ede9fe; }
+    @media (max-width:760px) { .studio-layout { grid-template-columns:1fr; } .studio-shell { padding:12px; } .studio-panel { padding:14px; } .studio-preview { min-height:260px; } .studio-header h2 { font-size:18px; } }
 
     @media (max-width: 650px) {
       .sidebar { display: none; position: fixed; z-index: 20; top: 0; bottom: 0; left: 0; width: min(290px, 85vw); box-shadow: 8px 0 28px #00000020; }
@@ -129,17 +175,48 @@
     </div>
   </div>
 
+  <section class="studio-overlay" id="studioOverlay" role="dialog" aria-modal="true" aria-labelledby="studioTitle">
+    <div class="studio-shell">
+      <div class="studio-header">
+        <div><h2 id="studioTitle">🎨 VIPER Image Studio</h2><p>Turn your imagination into an image.</p></div>
+        <button class="studio-close" id="closeImageStudio" type="button">✕ Close</button>
+      </div>
+      <div class="studio-layout">
+        <section class="studio-panel">
+          <h3>Create an image</h3>
+          <form id="studioForm">
+            <label class="studio-label" for="studioPrompt">Describe your image</label>
+            <textarea id="studioPrompt" maxlength="1800" placeholder="A neon cyberpunk snake coiled around a glowing crystal, cinematic lighting, highly detailed digital art..." required></textarea>
+            <div class="studio-controls">
+              <div><label class="studio-label" for="studioStyle">Style</label><select id="studioStyle"><option value="">No extra style</option><option value="cinematic digital art">Cinematic digital art</option><option value="anime illustration">Anime</option><option value="photorealistic photography">Photorealistic</option><option value="3D render, detailed materials">3D render</option><option value="watercolor painting">Watercolor</option><option value="pixel art">Pixel art</option><option value="minimal vector illustration">Minimal vector</option><option value="fantasy concept art">Fantasy concept art</option></select></div>
+              <div><label class="studio-label" for="studioRatio">Aspect ratio</label><select id="studioRatio"><option value="square">Square</option><option value="landscape">Landscape</option><option value="portrait">Portrait</option></select></div>
+            </div>
+            <button class="studio-generate" id="studioGenerate" type="submit">✨ Generate image</button>
+            <div class="studio-status" id="studioStatus" aria-live="polite">Uses Cloudflare Workers AI. Free usage limits apply.</div>
+          </form>
+          <p class="studio-footnote">Tip: describe the subject, setting, colors, lighting, and mood. Avoid entering private information.</p>
+        </section>
+        <section class="studio-panel">
+          <h3>Your creation</h3>
+          <div class="studio-preview" id="studioPreview"><div class="studio-placeholder" id="studioPlaceholder"><span class="studio-icon">🪄</span>Your generated image will appear here. Write a prompt and press Generate.</div><img id="studioImage" alt="AI-generated image preview"></div>
+          <div class="studio-image-actions"><button id="studioDownload" type="button" disabled>⬇ Download image</button><button id="studioClear" type="button" disabled>✕ Clear preview</button></div>
+        </section>
+      </div>
+    </div>
+  </section>
+
   <main class="main">
-    <header><button id="mobileHistory" type="button" aria-label="Open chat history">☰</button><span>🐍 Snake AI</span><span class="header-spacer"></span><button id="codingMode" class="coding-toggle" type="button" aria-pressed="false" title="Ask Snake AI for complete code files">💻 Coding mode: Off</button></header>
+    <header><button id="mobileHistory" type="button" aria-label="Open chat history">☰</button><span>🐍 Snake AI</span><span class="header-spacer"></span><button id="openImageStudio" class="studio-button" type="button">🎨 Image Studio</button><button id="codingMode" class="coding-toggle" type="button" aria-pressed="false" title="Ask Snake AI for complete code files">💻 Coding mode: Off</button></header>
     <section id="chat" aria-live="polite"></section>
     <div class="composer-wrap">
       <form class="composer" id="chatForm">
         <textarea id="prompt" placeholder="Message Snake AI..." rows="1" aria-label="Message Snake AI"></textarea>
         <button id="send" type="submit" aria-label="Send message">↑</button>
       </form>
-      <div class="disclaimer">Snake AI · Model: VIPER</div>
+      <div class="model-picker"><label for="modelSelect">Model</label><select id="modelSelect" aria-label="Choose AI model"><option value="viper1">VIPER 1</option><option value="viper2" selected>VIPER 2</option></select></div>
+      <div class="disclaimer" id="modelDescription">VIPER 2 · Gemini 3.8 Flash with 3.6 Flash fallback</div>
       <div class="storage-note">Conversation history stays in this browser and is not synced across devices.</div>
-      <div class="version-note">Snake AI v1.4 · Live streaming</div>
+      <div class="version-note">Snake AI v1.7 · VIPER 1 / VIPER 2 + Image Studio</div>
     </div>
   </main>
 
@@ -152,6 +229,20 @@
     const MEMORY_STORAGE_KEY = "snakeAI.savedMemories.v1";
     const MAX_MEMORIES = 100;
     const STREAMING_ENABLED = true;
+    const MODEL_STORAGE_KEY = "snakeAI.selectedModel.v1";
+    const modelSelect = document.getElementById("modelSelect");
+    const modelDescription = document.getElementById("modelDescription");
+    try { modelSelect.value = localStorage.getItem(MODEL_STORAGE_KEY) || "viper2"; } catch {}
+    function updateModelDescription() {
+      const descriptions = {
+        viper1: "VIPER 1 · Gemini 3.5 Flash Lite with 3.6 Flash fallback",
+        viper2: "VIPER 2 · Gemini 3.8 Flash with 3.6 Flash fallback"
+      };
+      modelDescription.textContent = descriptions[modelSelect.value] || descriptions.viper2;
+      try { localStorage.setItem(MODEL_STORAGE_KEY, modelSelect.value); } catch {}
+    }
+    modelSelect.addEventListener("change", updateModelDescription);
+    updateModelDescription();
 
     const chat = document.getElementById("chat");
     const form = document.getElementById("chatForm");
@@ -205,7 +296,102 @@
       try {
         savedMemories = [...new Set(savedMemories.map(item => item.trim()).filter(Boolean))].slice(0, MAX_MEMORIES);
         localStorage.setItem(MEMORY_STORAGE_KEY, JSON.stringify(savedMemories));
-        renderMemories();
+    
+    // VIPER Image Studio: image generation is routed through the Cloudflare Worker.
+    const studioOverlay = document.getElementById("studioOverlay");
+    const studioForm = document.getElementById("studioForm");
+    const studioPrompt = document.getElementById("studioPrompt");
+    const studioStyle = document.getElementById("studioStyle");
+    const studioRatio = document.getElementById("studioRatio");
+    const studioGenerate = document.getElementById("studioGenerate");
+    const studioStatus = document.getElementById("studioStatus");
+    const studioImage = document.getElementById("studioImage");
+    const studioPlaceholder = document.getElementById("studioPlaceholder");
+    const studioDownload = document.getElementById("studioDownload");
+    const studioClear = document.getElementById("studioClear");
+    let studioImageBlob = null;
+    let studioImageUrl = null;
+
+    function openStudio() {
+      studioOverlay.classList.add("open");
+      document.body.style.overflow = "hidden";
+      studioPrompt.focus();
+    }
+    function closeStudio() {
+      studioOverlay.classList.remove("open");
+      document.body.style.overflow = "";
+      document.getElementById("openImageStudio").focus();
+    }
+    function clearStudioImage() {
+      if (studioImageUrl) URL.revokeObjectURL(studioImageUrl);
+      studioImageUrl = null;
+      studioImageBlob = null;
+      studioImage.removeAttribute("src");
+      studioImage.style.display = "none";
+      studioPlaceholder.style.display = "block";
+      studioDownload.disabled = true;
+      studioClear.disabled = true;
+    }
+    document.getElementById("openImageStudio").addEventListener("click", openStudio);
+    document.getElementById("closeImageStudio").addEventListener("click", closeStudio);
+    studioOverlay.addEventListener("click", event => { if (event.target === studioOverlay) closeStudio(); });
+    document.addEventListener("keydown", event => { if (event.key === "Escape" && studioOverlay.classList.contains("open")) closeStudio(); });
+    studioClear.addEventListener("click", clearStudioImage);
+    studioDownload.addEventListener("click", () => {
+      if (!studioImageBlob) return;
+      const url = URL.createObjectURL(studioImageBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "viper-image-" + new Date().toISOString().replace(/[:.]/g, "-") + ".png";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+    studioForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const prompt = studioPrompt.value.trim();
+      if (!prompt) { studioStatus.textContent = "Enter a description first."; studioStatus.classList.add("error"); return; }
+      if (prompt.length > 1800) { studioStatus.textContent = "Please shorten your prompt to 1,800 characters."; studioStatus.classList.add("error"); return; }
+      const ratio = studioRatio.value;
+      const dimensions = ratio === "landscape" ? { width: 768, height: 512 } : ratio === "portrait" ? { width: 512, height: 768 } : { width: 512, height: 512 };
+      const style = studioStyle.value;
+      const fullPrompt = style ? `${prompt}. Style: ${style}.` : prompt;
+      studioGenerate.disabled = true;
+      studioGenerate.textContent = "⏳ Generating...";
+      studioStatus.classList.remove("error");
+      studioStatus.textContent = "VIPER is creating your image. This can take a little while...";
+      try {
+        const response = await fetch(API_URL.replace(/\/$/, "") + "/generate-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "image/png" },
+          body: JSON.stringify({ prompt: fullPrompt, width: dimensions.width, height: dimensions.height })
+        });
+        if (!response.ok) {
+          let detail = `Request failed (HTTP ${response.status}).`;
+          try { const data = await response.json(); detail = data.error || data.details || detail; } catch {}
+          throw new Error(detail);
+        }
+        const blob = await response.blob();
+        if (!blob.size || !blob.type.startsWith("image/")) throw new Error("The Worker did not return a valid image. Check the AI binding and Worker code.");
+        if (studioImageUrl) URL.revokeObjectURL(studioImageUrl);
+        studioImageBlob = blob;
+        studioImageUrl = URL.createObjectURL(blob);
+        studioImage.src = studioImageUrl;
+        studioImage.style.display = "block";
+        studioPlaceholder.style.display = "none";
+        studioDownload.disabled = false;
+        studioClear.disabled = false;
+        studioStatus.textContent = "Image generated successfully. Download it to save a copy.";
+      } catch (error) {
+        console.error("VIPER Image Studio error:", error);
+        studioStatus.textContent = (error instanceof TypeError ? "Network/CORS error. " : "") + (error.message || "Image generation failed.");
+        studioStatus.classList.add("error");
+      } finally {
+        studioGenerate.disabled = false;
+        studioGenerate.textContent = "✨ Generate image";
+      }
+    });
+
+    renderMemories();
         return true;
       } catch (error) {
         console.warn("Could not save Snake AI memories:", error);
@@ -405,6 +591,94 @@
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
+    function appendInlineMarkdown(parent, text) {
+      const pattern = /(`+)(.+?)\1|\*\*(.+?)\*\*|__(.+?)__|\*(?!\s)(.+?)(?<!\s)\*|_(?!\s)(.+?)(?<!\s)_|\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/g;
+      let last = 0, match;
+      while ((match = pattern.exec(text)) !== null) {
+        if (match.index > last) parent.appendChild(document.createTextNode(text.slice(last, match.index)));
+        let node;
+        if (match[1]) {
+          node = document.createElement('code');
+          node.className = 'inline-code';
+          node.textContent = match[2];
+        } else if (match[3] || match[4]) {
+          node = document.createElement('strong');
+          node.textContent = match[3] || match[4];
+        } else if (match[5] || match[6]) {
+          node = document.createElement('em');
+          node.textContent = match[5] || match[6];
+        } else {
+          node = document.createElement('a');
+          node.textContent = match[7];
+          node.href = match[8];
+          node.target = '_blank';
+          node.rel = 'noopener noreferrer';
+        }
+        parent.appendChild(node);
+        last = pattern.lastIndex;
+      }
+      if (last < text.length) parent.appendChild(document.createTextNode(text.slice(last)));
+    }
+
+    function renderMarkdownProse(container, text) {
+      if (!text) return;
+      const root = document.createElement('div');
+      root.className = 'markdown-body';
+      const lines = text.replace(/\r/g, '').split('\n');
+      let i = 0;
+      const isBlank = line => !line || !line.trim();
+      const isHr = line => /^\s*(?:---+|___+|\*\s*\*\s*\*+)\s*$/.test(line);
+      const heading = line => line.match(/^\s{0,3}(#{1,6})\s+(.+?)\s*#*\s*$/);
+      const unordered = line => line.match(/^\s*[-+*]\s+(.+)$/);
+      const ordered = line => line.match(/^\s*\d+[.)]\s+(.+)$/);
+      const quote = line => line.match(/^\s*>\s?(.*)$/);
+      const startsBlock = line => isBlank(line) || heading(line) || isHr(line) || unordered(line) || ordered(line) || quote(line) || /^\s*```/.test(line);
+
+      while (i < lines.length) {
+        if (isBlank(lines[i])) { i++; continue; }
+        let m = heading(lines[i]);
+        if (m) {
+          const el = document.createElement('h' + m[1].length);
+          appendInlineMarkdown(el, m[2]); root.appendChild(el); i++; continue;
+        }
+        if (isHr(lines[i])) { root.appendChild(document.createElement('hr')); i++; continue; }
+        if (unordered(lines[i]) || ordered(lines[i])) {
+          const first = unordered(lines[i]) ? 'ul' : 'ol';
+          const list = document.createElement(first);
+          while (i < lines.length) {
+            const item = first === 'ul' ? unordered(lines[i]) : ordered(lines[i]);
+            if (!item) break;
+            const li = document.createElement('li');
+            appendInlineMarkdown(li, item[1]);
+            list.appendChild(li); i++;
+          }
+          root.appendChild(list); continue;
+        }
+        if (quote(lines[i])) {
+          const block = document.createElement('blockquote');
+          while (i < lines.length && quote(lines[i])) {
+            const q = quote(lines[i]);
+            const p = document.createElement('p'); appendInlineMarkdown(p, q[1]); block.appendChild(p); i++;
+          }
+          root.appendChild(block); continue;
+        }
+        const p = document.createElement('p');
+        let paragraphLines = [];
+        while (i < lines.length && !startsBlock(lines[i])) {
+          paragraphLines.push(lines[i]); i++;
+        }
+        if (!paragraphLines.length && i < lines.length && !isBlank(lines[i])) {
+          paragraphLines.push(lines[i]); i++;
+        }
+        paragraphLines.forEach((line, index) => {
+          if (index) p.appendChild(document.createElement('br'));
+          appendInlineMarkdown(p, line);
+        });
+        if (paragraphLines.length) root.appendChild(p);
+      }
+      container.appendChild(root);
+    }
+
     function renderAssistantContent(container, text) {
       container.replaceChildren();
 
@@ -432,9 +706,7 @@
       let last = 0, match, blockIndex = 0;
       while ((match = fencePattern.exec(text)) !== null) {
         if (match.index > last) {
-          const prose = document.createElement("span");
-          prose.textContent = text.slice(last, match.index);
-          container.appendChild(prose);
+          renderMarkdownProse(container, text.slice(last, match.index));
         }
         const info = match[1].trim();
         const language = (info.split(/\s+/)[0] || "text").replace(/[^a-zA-Z0-9+#.-]/g, "");
@@ -485,9 +757,7 @@
         last = fencePattern.lastIndex;
       }
       if (last < text.length) {
-        const prose = document.createElement("span");
-        prose.textContent = text.slice(last);
-        container.appendChild(prose);
+        renderMarkdownProse(container, text.slice(last));
       }
       if (!text) container.textContent = "";
     }
@@ -691,7 +961,7 @@
         const response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json", "Accept": "text/event-stream" },
-          body: JSON.stringify({ message: conversationContext(current.messages), stream: STREAMING_ENABLED })
+          body: JSON.stringify({ message: conversationContext(current.messages), stream: STREAMING_ENABLED, model: modelSelect.value })
         });
         if (!response.ok) {
           let detail = "Unknown server error";
