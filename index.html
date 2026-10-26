@@ -43,9 +43,7 @@
     #send { border: none; background: #16a34a; color: white; border-radius: 10px; width: 42px; height: 42px; font-size: 20px; cursor: pointer; flex-shrink: 0; }
     #send:hover { background: #15803d; }
     #send:disabled { opacity: .5; cursor: wait; }
-    .model-picker { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; font-size: 12px; color: #777; }
-    .model-picker select { border: 1px solid #d9d9e3; background: #fff; color: #202123; border-radius: 8px; padding: 6px 9px; font: inherit; cursor: pointer; }
-    .disclaimer { text-align: center; font-size: 11px; color: #888; margin-top: 7px; }
+    .disclaimer { text-align: center; font-size: 11px; color: #888; margin-top: 10px; }
     .storage-note { font-size: 11px; color: #888; text-align: center; margin-top: 5px; }
     .mobile-scrim { display: none; }
 
@@ -102,8 +100,6 @@
     .memory-empty { color: #777; font-size: 13px; padding: 10px 2px; }
     .memory-status { font-size: 12px; color: #16803d; min-height: 18px; margin-top: 8px; }
 
-
-
     @media (max-width: 650px) {
       .sidebar { display: none; position: fixed; z-index: 20; top: 0; bottom: 0; left: 0; width: min(290px, 85vw); box-shadow: 8px 0 28px #00000020; }
       .sidebar.open { display: flex; }
@@ -126,7 +122,7 @@
     <button class="memory-button" id="manageMemory" type="button">🧠 Manage memory</button>
     <div class="history-heading">Your conversations</div>
     <div id="historyList" aria-label="Saved conversations"></div>
-    <div class="sidebar-note">Chats are saved in this browser on this device.</div>
+    <div class="sidebar-note">Chats are saved in this browser on this device.<br><br>Backend: Cloudflare Worker</div>
   </aside>
 
   <div class="memory-overlay" id="memoryOverlay" role="dialog" aria-modal="true" aria-labelledby="memoryTitle">
@@ -153,9 +149,9 @@
         <textarea id="prompt" placeholder="Message Snake AI..." rows="1" aria-label="Message Snake AI"></textarea>
         <button id="send" type="submit" aria-label="Send message">↑</button>
       </form>
-      <div class="disclaimer">VIPER · Gemini-powered AI</div>
+      <div class="disclaimer">Snake AI · Model: VIPER</div>
       <div class="storage-note">Conversation history stays in this browser and is not synced across devices.</div>
-      <div class="version-note">Snake AI v1.9 · Markdown renderer</div>
+      <div class="version-note">Snake AI v1.4 · Live streaming</div>
     </div>
   </main>
 
@@ -536,7 +532,9 @@
       let last = 0, match, blockIndex = 0;
       while ((match = fencePattern.exec(text)) !== null) {
         if (match.index > last) {
+          const prose = document.createElement("span");
           renderMarkdownProse(container, text.slice(last, match.index));
+          container.appendChild(prose);
         }
         const info = match[1].trim();
         const language = (info.split(/\s+/)[0] || "text").replace(/[^a-zA-Z0-9+#.-]/g, "");
@@ -587,7 +585,9 @@
         last = fencePattern.lastIndex;
       }
       if (last < text.length) {
+        const prose = document.createElement("span");
         renderMarkdownProse(container, text.slice(last));
+        container.appendChild(prose);
       }
       if (!text) container.textContent = "";
     }
@@ -791,7 +791,7 @@
         const response = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json", "Accept": "text/event-stream" },
-          body: JSON.stringify({ message: conversationContext(current.messages), stream: STREAMING_ENABLED, model: "viper2" })
+          body: JSON.stringify({ message: conversationContext(current.messages), stream: STREAMING_ENABLED })
         });
         if (!response.ok) {
           let detail = "Unknown server error";
